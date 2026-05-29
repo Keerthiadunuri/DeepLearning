@@ -1,193 +1,340 @@
+# =========================================
+# AI-POWERED EMPLOYEE ATTRITION PREDICTION
+# STREAMLIT APPLICATION
+# =========================================
+
+# Import Libraries
 import streamlit as st
 import pandas as pd
 import joblib
+import numpy as np
 
-model = joblib.load("random_forest.pkl")
+# =========================================
+# PAGE CONFIGURATION
+# =========================================
 
 st.set_page_config(
-    page_title="Employee Attrition Prediction",
-    page_icon="📊"
+    page_title="Employee Attrition Predictor",
+    page_icon="📊",
+    layout="wide"
 )
 
-st.title("AI-Powered Employee Attrition Prediction System")
+# =========================================
+# LOAD MODEL & SCALER
+# =========================================
 
-st.write("Enter Employee Details")
+model = joblib.load("logistic_regression.pkl")
 
-age = st.number_input(
+scaler = joblib.load("scaler.pkl")
+
+# =========================================
+# APPLICATION TITLE
+# =========================================
+
+st.title("📊 AI-Powered Employee Attrition Prediction System")
+
+st.markdown(
+    """
+    Predict employee attrition risk using Machine Learning.
+    """
+)
+
+# =========================================
+# SIDEBAR
+# =========================================
+
+st.sidebar.header("Employee Details")
+
+# =========================================
+# USER INPUTS
+# =========================================
+
+Age = st.sidebar.slider(
     "Age",
-    min_value=18,
-    max_value=60,
-    value=35
+    18,
+    60,
+    30
 )
 
-daily_rate = st.number_input(
+DailyRate = st.sidebar.slider(
     "Daily Rate",
-    value=1000
+    100,
+    1500,
+    800
 )
 
-distance_from_home = st.number_input(
+DistanceFromHome = st.sidebar.slider(
     "Distance From Home",
-    value=5
+    1,
+    30,
+    10
 )
 
-education = st.selectbox(
+Education = st.sidebar.selectbox(
     "Education",
-    [1,2,3,4,5]
+    [1, 2, 3, 4, 5]
 )
 
-environment_satisfaction = st.selectbox(
+EnvironmentSatisfaction = st.sidebar.selectbox(
     "Environment Satisfaction",
-    [1,2,3,4]
+    [1, 2, 3, 4]
 )
 
-job_involvement = st.selectbox(
+HourlyRate = st.sidebar.slider(
+    "Hourly Rate",
+    30,
+    100,
+    60
+)
+
+JobInvolvement = st.sidebar.selectbox(
     "Job Involvement",
-    [1,2,3,4]
+    [1, 2, 3, 4]
 )
 
-job_level = st.selectbox(
+JobLevel = st.sidebar.selectbox(
     "Job Level",
-    [1,2,3,4,5]
+    [1, 2, 3, 4, 5]
 )
 
-job_satisfaction = st.selectbox(
+JobSatisfaction = st.sidebar.selectbox(
     "Job Satisfaction",
-    [1,2,3,4]
+    [1, 2, 3, 4]
 )
 
-monthly_income = st.number_input(
+MonthlyIncome = st.sidebar.slider(
     "Monthly Income",
-    value=4500
+    1000,
+    20000,
+    5000
 )
 
-num_companies_worked = st.number_input(
-    "Number Of Companies Worked",
-    value=2
+MonthlyRate = st.sidebar.slider(
+    "Monthly Rate",
+    2000,
+    30000,
+    15000
 )
 
-percent_salary_hike = st.number_input(
+NumCompaniesWorked = st.sidebar.slider(
+    "Number of Companies Worked",
+    0,
+    10,
+    2
+)
+
+PercentSalaryHike = st.sidebar.slider(
     "Percent Salary Hike",
-    value=15
+    10,
+    30,
+    15
 )
 
-performance_rating = st.selectbox(
+PerformanceRating = st.sidebar.selectbox(
     "Performance Rating",
-    [3,4]
+    [1, 2, 3, 4]
 )
 
-relationship_satisfaction = st.selectbox(
+RelationshipSatisfaction = st.sidebar.selectbox(
     "Relationship Satisfaction",
-    [1,2,3,4]
+    [1, 2, 3, 4]
 )
 
-stock_option_level = st.selectbox(
+StockOptionLevel = st.sidebar.selectbox(
     "Stock Option Level",
-    [0,1,2,3]
+    [0, 1, 2, 3]
 )
 
-total_working_years = st.number_input(
+TotalWorkingYears = st.sidebar.slider(
     "Total Working Years",
-    value=10
+    0,
+    40,
+    10
 )
 
-training_times_last_year = st.number_input(
+TrainingTimesLastYear = st.sidebar.slider(
     "Training Times Last Year",
-    value=2
+    0,
+    10,
+    3
 )
 
-work_life_balance = st.selectbox(
+WorkLifeBalance = st.sidebar.selectbox(
     "Work Life Balance",
-    [1,2,3,4]
+    [1, 2, 3, 4]
 )
 
-years_at_company = st.number_input(
+YearsAtCompany = st.sidebar.slider(
     "Years At Company",
-    value=5
+    0,
+    40,
+    5
 )
 
-years_in_current_role = st.number_input(
+YearsInCurrentRole = st.sidebar.slider(
     "Years In Current Role",
-    value=3
+    0,
+    20,
+    3
 )
 
-years_since_last_promotion = st.number_input(
+YearsSinceLastPromotion = st.sidebar.slider(
     "Years Since Last Promotion",
-    value=1
+    0,
+    15,
+    1
 )
 
-years_with_curr_manager = st.number_input(
+YearsWithCurrManager = st.sidebar.slider(
     "Years With Current Manager",
-    value=3
+    0,
+    20,
+    3
 )
+
+# =========================================
+# ENCODED CATEGORICAL FEATURES
+# =========================================
+
+BusinessTravel = st.sidebar.selectbox(
+    "Business Travel",
+    [0, 1, 2]
+)
+
+Department = st.sidebar.selectbox(
+    "Department",
+    [0, 1, 2]
+)
+
+EducationField = st.sidebar.selectbox(
+    "Education Field",
+    [0, 1, 2, 3, 4, 5]
+)
+
+Gender = st.sidebar.selectbox(
+    "Gender",
+    [0, 1]
+)
+
+JobRole = st.sidebar.selectbox(
+    "Job Role",
+    [0, 1, 2, 3, 4, 5, 6, 7, 8]
+)
+
+MaritalStatus = st.sidebar.selectbox(
+    "Marital Status",
+    [0, 1, 2]
+)
+
+OverTime = st.sidebar.selectbox(
+    "OverTime",
+    [0, 1]
+)
+
+# =========================================
+# CREATE INPUT DATAFRAME
+# =========================================
+
+input_data = pd.DataFrame({
+    'Age': [Age],
+    'BusinessTravel': [BusinessTravel],
+    'DailyRate': [DailyRate],
+    'Department': [Department],
+    'DistanceFromHome': [DistanceFromHome],
+    'Education': [Education],
+    'EducationField': [EducationField],
+    'EnvironmentSatisfaction': [EnvironmentSatisfaction],
+    'Gender': [Gender],
+    'HourlyRate': [HourlyRate],
+    'JobInvolvement': [JobInvolvement],
+    'JobLevel': [JobLevel],
+    'JobRole': [JobRole],
+    'JobSatisfaction': [JobSatisfaction],
+    'MaritalStatus': [MaritalStatus],
+    'MonthlyIncome': [MonthlyIncome],
+    'MonthlyRate': [MonthlyRate],
+    'NumCompaniesWorked': [NumCompaniesWorked],
+    'OverTime': [OverTime],
+    'PercentSalaryHike': [PercentSalaryHike],
+    'PerformanceRating': [PerformanceRating],
+    'RelationshipSatisfaction': [RelationshipSatisfaction],
+    'StockOptionLevel': [StockOptionLevel],
+    'TotalWorkingYears': [TotalWorkingYears],
+    'TrainingTimesLastYear': [TrainingTimesLastYear],
+    'WorkLifeBalance': [WorkLifeBalance],
+    'YearsAtCompany': [YearsAtCompany],
+    'YearsInCurrentRole': [YearsInCurrentRole],
+    'YearsSinceLastPromotion': [YearsSinceLastPromotion],
+    'YearsWithCurrManager': [YearsWithCurrManager]
+})
+
+# =========================================
+# DISPLAY INPUT DATA
+# =========================================
+
+st.subheader("Employee Input Data")
+
+st.dataframe(input_data)
+
+# =========================================
+# SCALE INPUT DATA
+# =========================================
+
+input_scaled = scaler.transform(input_data)
+
+# =========================================
+# PREDICTION BUTTON
+# =========================================
 
 if st.button("Predict Attrition"):
 
-    features = pd.DataFrame([[
-        age,
-        0,
-        daily_rate,
-        1,
-        distance_from_home,
-        education,
-        1,
-        1,
-        1000,
-        environment_satisfaction,
-        1,
-        80,
-        job_involvement,
-        job_level,
-        1,
-        job_satisfaction,
-        1,
-        monthly_income,
-        20000,
-        num_companies_worked,
-        0,
-        percent_salary_hike,
-        performance_rating,
-        relationship_satisfaction,
-        80,
-        stock_option_level,
-        total_working_years,
-        training_times_last_year,
-        work_life_balance,
-        years_at_company,
-        years_in_current_role,
-        years_since_last_promotion,
-        years_with_curr_manager,
-        1
-    ]])
+    prediction = model.predict(input_scaled)
 
-    prediction = model.predict(features)[0]
+    probability = model.predict_proba(input_scaled)
 
-    probability = model.predict_proba(features)[0][1] * 100
+    attrition_prob = probability[0][1] * 100
 
-    if probability >= 75:
-        risk = "HIGH"
-    elif probability >= 40:
-        risk = "MEDIUM"
+    # =====================================
+    # RISK LEVEL
+    # =====================================
+
+    if attrition_prob > 70:
+        risk_level = "HIGH RISK"
+
+    elif attrition_prob > 40:
+        risk_level = "MEDIUM RISK"
+
     else:
-        risk = "LOW"
+        risk_level = "LOW RISK"
+
+    # =====================================
+    # DISPLAY RESULTS
+    # =====================================
 
     st.subheader("Prediction Result")
 
-    st.write(
-        "Attrition Probability:",
-        round(probability,2),
-        "%"
-    )
+    if prediction[0] == 1:
+        st.error("⚠️ Employee Likely to Leave")
 
-    st.write(
-        "Risk Level:",
-        risk
-    )
-
-    if prediction == 1:
-        st.error(
-            "Employee likely to leave."
-        )
     else:
-        st.success(
-            "Employee likely to stay."
-        )
+        st.success("✅ Employee Likely to Stay")
+
+    st.metric(
+        "Attrition Probability",
+        f"{attrition_prob:.2f}%"
+    )
+
+    st.metric(
+        "Risk Level",
+        risk_level
+    )
+
+# =========================================
+# FOOTER
+# =========================================
+
+st.markdown("---")
+
+st.markdown(
+    "Developed using Streamlit & Machine Learning"
+)
